@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Delivery {
+  id               Int             @id @default(autoincrement())
+  orderId          Int             @unique(map: "Delivery_orderId_key")
+  deliveryPersonId Int
+  status           delivery_status @default(ASSIGNED)
+  currentLocation  String?
+  updatedAt        DateTime        @updatedAt
+
+  order          Order @relation(fields: [orderId], references: [id])
+  deliveryPerson User  @relation(fields: [deliveryPersonId], references: [id])
+
+  @@index([deliveryPersonId], map: "Delivery_deliveryPersonId_fkey")
+  @@map("delivery")
+}
+
+model MenuItem {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float
+  category    String
+  isAvailable Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  imageUrl    String?
+  orderItems  OrderItem[]
+
+  @@map("menuitem")
+}
+
+model Order {
+  id          Int          @id @default(autoincrement())
+  customerId  Int
+  status      order_status @default(PENDING)
+  totalAmount Float
+  address     String
+  lat         Float?
+  lng         Float?
+  createdAt   DateTime     @default(now())
+
+  customer   User        @relation(fields: [customerId], references: [id])
+
+  orderItems OrderItem[]
+  delivery   Delivery?
+  payment    Payment?
+
+  @@index([customerId], map: "Order_customerId_fkey")
+  @@map("order")
+}
+
+model OrderItem {
+  id         Int   @id @default(autoincrement())
+  orderId    Int
+  menuItemId Int
+  quantity   Int
+  price      Float
+
+  order    Order    @relation(fields: [orderId], references: [id])
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@index([menuItemId], map: "OrderItem_menuItemId_fkey")
+  @@index([orderId], map: "OrderItem_orderId_fkey")
+  @@map("orderitem")
+}
+
+model Payment {
+  id      Int       @id @default(autoincrement())
+  orderId Int       @unique(map: "Payment_orderId_key")
+  method  String
+  status  String
+  paidAt  DateTime?
+
+  order Order @relation(fields: [orderId], references: [id])
+  @@map("payment")
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique(map: "User_email_key")
+  password   String
+  firstName  String
+  middleName String?
+  lastName   String
+  role       user_role @default(CUSTOMER)
+  phone      String?
+  createdAt  DateTime  @default(now())
+
+  orders     Order[]
+  deliveries Delivery[]
+
+  @@map("user")
+}
+
+enum order_status {
+  PENDING
+  PREPARING
+  OUT_FOR_DELIVERY
+  COMPLETED
+  CANCELLED
+}
+
+enum delivery_status {
+  ASSIGNED
+  PICKED_UP
+  ON_THE_WAY
+  DELIVERED
+}
+
+enum user_role {
+  ADMIN
+  CUSTOMER
+  RIDER
+}
