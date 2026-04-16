@@ -33,10 +33,15 @@ import {
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
+import {
+  Field,
+  FieldError,
+} from "@/components/ui/field"
 
 export default function PayoutPage() {
   const { cartItems, totalPrice, clearCart } = useCart()
   const [address, setAddress] = useState("")
+  const [addressError, setAddressError] = useState("")
   const [paymentMethod, setPaymentMethod] = useState("COD")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDetecting, setIsDetecting] = useState(false)
@@ -78,6 +83,7 @@ export default function PayoutPage() {
           
           if (data && data.display_name) {
             setAddress(data.display_name)
+            setAddressError("")
             toast.success("Location accurately pinned!")
           } else {
             setAddress(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`)
@@ -108,9 +114,12 @@ export default function PayoutPage() {
     e.preventDefault()
     
     if (!address || address.length < 5) {
-      toast.error("Please provide a complete delivery address (min 5 characters)")
+      setAddressError("Please provide a complete delivery address (min 5 characters)")
+      toast.error("Delivery address is required")
       return
     }
+
+    setAddressError("")
 
     if (!paymentMethod) {
       toast.error("Please select a payment method")
@@ -170,7 +179,7 @@ export default function PayoutPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
+              <Field data-invalid={!!addressError}>
                 <Label htmlFor="address" className="flex justify-between items-center group">
                   <span>Exact Location / Street Address <span className="text-destructive">*</span></span>
                   <span className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">Required</span>
@@ -181,7 +190,10 @@ export default function PayoutPage() {
                     placeholder="e.g., House 123, Street Name, Baguio City"
                     className="h-12 bg-background border-muted/80 pr-32 transition-all focus:ring-2 focus:ring-primary/20"
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    onChange={(e) => {
+                      setAddress(e.target.value)
+                      if (addressError) setAddressError("")
+                    }}
                     required
                   />
                   <Button
@@ -200,7 +212,8 @@ export default function PayoutPage() {
                     {isDetecting ? "Detecting..." : "Auto Pin"}
                   </Button>
                 </div>
-              </div>
+                <FieldError>{addressError}</FieldError>
+              </Field>
             </CardContent>
           </Card>
 

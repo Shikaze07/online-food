@@ -123,7 +123,7 @@ export function AddUserDialog() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
-              <Input id="phone" {...register("phone")} placeholder="+1234567890" />
+              <Input id="phone" {...register("phone")} placeholder="09123456789" />
               {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
             </div>
           </div>
