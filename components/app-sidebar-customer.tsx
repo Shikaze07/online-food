@@ -12,8 +12,10 @@ import {
   IconShoppingCart,
   IconTruckDelivery,
   IconTools,
+  IconHistory,
 } from "@tabler/icons-react";
 import { LogOutIcon } from "lucide-react";
+import { logout } from "@/lib/actions/auth-actions";
 import { NavMain } from "@/components/nav-main";
 import {
   Sidebar,
@@ -52,7 +54,7 @@ const data = {
     {
       title: "Order History",
       url: "/customer/order-history",
-      icon: <IconDatabase />,
+      icon: <IconHistory />,
     },
     {
       title: "Order Tracking",
@@ -114,8 +116,9 @@ export function AppSidebarCustomer({ ...props }: React.ComponentProps<typeof Sid
           <Button
             variant="outline"
             className="w-full justify-start gap-2"
-            onClick={() => {
-              toast.success("Logged out successfully!")
+            onClick={async () => {
+              toast.success("Logging out...");
+              await logout();
             }}
           >
             <LogOutIcon className="size-4" />

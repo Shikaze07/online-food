@@ -12,8 +12,16 @@ import {
   IconShoppingCart,
   IconTruckDelivery,
   IconTools,
+  IconHistory,
+  IconSubtask,
+  IconPencil,
+  IconBook,
+  IconDirectionSign,
+  IconTableSpark,
+  IconChecklist,
 } from "@tabler/icons-react";
 import { LogOutIcon } from "lucide-react";
+import { logout } from "@/lib/actions/auth-actions";
 import { NavMain } from "@/components/nav-main";
 import {
   Sidebar,
@@ -37,7 +45,7 @@ const data = {
     {
       title: "Order Assignment",
       url: "/rider/order-assignment",
-      icon: <IconTools />,
+      icon: <IconChecklist />,
     },
 
     {
@@ -48,7 +56,7 @@ const data = {
     {
       title: "Delivery History",
       url: "/rider/delivery-history",
-      icon: <IconUsers />,
+      icon: <IconHistory />,
     },
   ],
   navSecondary: [
@@ -100,8 +108,9 @@ export function AppSidebarRider({ ...props }: React.ComponentProps<typeof Sideba
           <Button
             variant="outline"
             className="w-full justify-start gap-2"
-            onClick={() => {
-              toast.success("Logged out successfully!")
+            onClick={async () => {
+              toast.success("Logging out...");
+              await logout();
             }}
           >
             <LogOutIcon className="size-4" />
