@@ -15,7 +15,7 @@ export const config = {
   ],
 };
 
-const secretKey = process.env.JWT_SECRET || "super-secret-key-for-food-ordering-system";
+const secretKey = process.env.JWT_SECRET ;
 const key = new TextEncoder().encode(secretKey);
 
 export async function proxy(request) {
@@ -82,3 +82,5 @@ export async function proxy(request) {
     return response;
   }
 }
+
+export const middleware = proxy;

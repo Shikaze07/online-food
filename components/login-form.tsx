@@ -59,7 +59,7 @@ export function LoginForm({
         
         // Redirect based on role
         if (result.role === "ADMIN") {
-          router.push("/admin/dashboard");
+          router.push("/admin/user-management");
         } else if (result.role === "RIDER") {
           router.push("/rider/order-assignment");
         } else {
@@ -136,10 +136,7 @@ export function LoginForm({
           </form>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
-        By clicking login, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
-      </FieldDescription>
+     
     </div>
   )
 }
