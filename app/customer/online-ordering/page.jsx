@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useCart } from "@/context/cart-context"
 import { createOrder } from "@/lib/actions/order-actions"
 import { Button } from "@/components/ui/button"
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import dynamic from "next/dynamic"
 import {
   IconMapPin,
   IconCreditCard,
@@ -38,6 +39,16 @@ import {
   FieldError,
 } from "@/components/ui/field"
 
+const LocationPicker = dynamic(() => import("@/components/location-picker"), { 
+  ssr: false,
+  loading: () => (
+    <div className="h-[300px] w-full bg-muted/20 flex flex-col items-center justify-center space-y-4 rounded-xl border border-dashed border-border">
+      <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <p className="text-sm text-muted-foreground animate-pulse">Warming up map engines...</p>
+    </div>
+  )
+})
+
 export default function PayoutPage() {
   const { cartItems, totalPrice, clearCart } = useCart()
   const [address, setAddress] = useState("")
@@ -46,21 +57,16 @@ export default function PayoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDetecting, setIsDetecting] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isPinPromptOpen, setIsPinPromptOpen] = useState(false)
   const [placedOrderId, setPlacedOrderId] = useState(null)
   const [coords, setCoords] = useState({ lat: null, lng: null })
   const router = useRouter()
 
-  const handleAutoLocation = () => {
+  const detectLocation = () => {
     if (!navigator.geolocation) {
       toast.error("Geolocation is not supported by your browser")
       return
     }
-    setIsPinPromptOpen(true)
-  }
-
-  const executeGeoLocation = () => {
-    setIsPinPromptOpen(false)
+    
     setIsDetecting(true)
     
     const options = {
@@ -75,7 +81,6 @@ export default function PayoutPage() {
         setCoords({ lat: latitude, lng: longitude })
 
         try {
-          // Real Reverse Geocoding via Nominatim (OpenStreetMap)
           const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
           )
@@ -104,11 +109,33 @@ export default function PayoutPage() {
           : "Unable to retrieve your location. Please check your signal/GPS."
         
         toast.error(errorMsg)
-        console.error("Geolocation error:", error.code, error.message)
       },
       options
     )
   }
+
+  const handleLocationChange = async (newCoords) => {
+    setCoords(newCoords)
+    
+    // Perform reverse geocoding for the new coordinates
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${newCoords.lat}&lon=${newCoords.lng}`
+      )
+      const data = await response.json()
+      
+      if (data && data.display_name) {
+        setAddress(data.display_name)
+        setAddressError("")
+      }
+    } catch (error) {
+      console.error("Reverse geocoding failed:", error)
+    }
+  }
+
+  useEffect(() => {
+    detectLocation()
+  }, [])
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault()
@@ -175,43 +202,57 @@ export default function PayoutPage() {
               </div>
               <div>
                 <CardTitle>Delivery Address</CardTitle>
-                <CardDescription>Where should we send your food?</CardDescription>
+                <CardDescription>Verify your delivery location on the map for 100% accuracy.</CardDescription>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <LocationPicker 
+                  value={coords.lat ? coords : null} 
+                  onChange={handleLocationChange}
+                  className="h-[300px] w-full"
+                />
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2 h-10 font-bold border-primary/20 hover:bg-primary/5 text-primary"
+                  onClick={detectLocation}
+                  disabled={isDetecting}
+                >
+                  {isDetecting ? (
+                    <>
+                      <IconLoader2 className="h-4 w-4 animate-spin" />
+                      Pinpointing...
+                    </>
+                  ) : (
+                    <>
+                      <IconMapPin className="h-4 w-4" />
+                      Re-detect My Current Location
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              <Separator className="bg-primary/5" />
+
               <Field data-invalid={!!addressError}>
                 <Label htmlFor="address" className="flex justify-between items-center group">
-                  <span>Exact Location / Street Address <span className="text-destructive">*</span></span>
+                  <span>Street Address / Building Details <span className="text-destructive">*</span></span>
                   <span className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider">Required</span>
                 </Label>
-                <div className="relative">
-                  <Input
-                    id="address"
-                    placeholder="e.g., House 123, Street Name, Baguio City"
-                    className="h-12 bg-background border-muted/80 pr-32 transition-all focus:ring-2 focus:ring-primary/20"
-                    value={address}
-                    onChange={(e) => {
-                      setAddress(e.target.value)
-                      if (addressError) setAddressError("")
-                    }}
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="link"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 gap-1.5 h-8 px-3 text-primary hover:bg-primary/5 rounded-md no-underline hover:no-underline"
-                    onClick={handleAutoLocation}
-                    disabled={isDetecting}
-                  >
-                    {isDetecting ? (
-                      <IconLoader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <IconMapPin className="h-3.5 w-3.5" />
-                    )}
-                    {isDetecting ? "Detecting..." : "Auto Pin"}
-                  </Button>
-                </div>
+                <Input
+                  id="address"
+                  placeholder="e.g., House 123, Street Name, Barangay"
+                  className="h-12 bg-background border-muted/80 transition-all focus:ring-2 focus:ring-primary/20"
+                  value={address}
+                  onChange={(e) => {
+                    setAddress(e.target.value)
+                    if (addressError) setAddressError("")
+                  }}
+                  required
+                />
                 <FieldError>{addressError}</FieldError>
               </Field>
             </CardContent>
@@ -364,40 +405,6 @@ export default function PayoutPage() {
               }}
             >
               Order Something Else
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Location Pin Permission Modal */}
-      <Dialog open={isPinPromptOpen} onOpenChange={setIsPinPromptOpen}>
-        <DialogContent className="sm:max-w-[400px] border-primary/20">
-          <DialogHeader className="flex flex-col items-center text-center space-y-4">
-            <div className="h-16 w-16 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-              <IconMapPin className="h-10 w-10" />
-            </div>
-            <div className="space-y-2">
-              <DialogTitle className="text-2xl font-bold">Use Current Location?</DialogTitle>
-              <DialogDescription>
-                We use your location to provide a more accurate delivery experience for our riders. 
-                Your coordinates will be converted to a delivery address.
-              </DialogDescription>
-            </div>
-          </DialogHeader>
-          <div className="grid gap-3 pt-4">
-            <Button 
-              className="h-12 font-bold gap-2" 
-              onClick={executeGeoLocation}
-            >
-              <IconCheck className="h-4 w-4" />
-              Allow & Pin Location
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="h-12 font-medium"
-              onClick={() => setIsPinPromptOpen(false)}
-            >
-              Cancel
             </Button>
           </div>
         </DialogContent>

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
-import { getRiderActiveDelivery, updateDeliveryStatus, getDeliveryPersonnel } from "@/lib/actions/delivery-actions"
+import { getRiderActiveDelivery, updateDeliveryStatus } from "@/lib/actions/delivery-actions"
+import { getCurrentUser } from "@/lib/actions/auth-actions"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -46,6 +47,7 @@ export default function DeliveryTrackingPage() {
   const [selectedRiderId, setSelectedRiderId] = useState("")
   const [updatingId, setUpdatingId] = useState(null)
   const [riderCoords, setRiderCoords] = useState(null)
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -58,28 +60,33 @@ export default function DeliveryTrackingPage() {
     }
   }, [])
 
-  // Fetch active delivery for the selected rider
+  // Fetch active delivery for the logged in rider
   useEffect(() => {
-    // For now, we fetch the first active rider's delivery since auth isn't fully set up,
-    // or we'll just fetch whatever active delivery exists.
-    async function loadActiveDelivery() {
-      setLoading(true)
-      const riderRes = await getDeliveryPersonnel()
-      const firstRider = riderRes.personnel?.[0]
-      if (firstRider) {
-        const res = await getRiderActiveDelivery(firstRider.id)
-        if (res.delivery) {
-          setActiveDelivery(res.delivery)
-        } else {
-          setActiveDelivery(null)
+    async function loadActiveDelivery(isInitial = false) {
+      if (isInitial) setLoading(true)
+      try {
+        const user = await getCurrentUser()
+        if (user && user.role === "RIDER") {
+          setSelectedRiderId(user.id)
+          const res = await getRiderActiveDelivery(user.id)
+          if (res.delivery) {
+            setActiveDelivery(res.delivery)
+          } else {
+            setActiveDelivery(null)
+          }
         }
+      } catch (error) {
+        console.error("Failed to load delivery:", error)
+      } finally {
+        if (isInitial) setLoading(false)
       }
-      setLoading(false)
     }
-    loadActiveDelivery()
+    
+    loadActiveDelivery(true)
+    setIsInitialLoad(false)
 
-    // Poll for updates every 30 seconds
-    const interval = setInterval(loadActiveDelivery, 30000)
+    // Poll for updates every 30 seconds (silent refetch, no loading state)
+    const interval = setInterval(() => loadActiveDelivery(false), 30000)
     return () => clearInterval(interval)
   }, [])
 
@@ -96,9 +103,7 @@ export default function DeliveryTrackingPage() {
         if (newStatus === "DELIVERED") {
             setActiveDelivery(null)
         } else {
-            const riderRes = await getDeliveryPersonnel()
-            const firstRider = riderRes.personnel?.[0]
-            const updated = await getRiderActiveDelivery(firstRider.id)
+            const updated = await getRiderActiveDelivery(selectedRiderId)
             if (updated.delivery) setActiveDelivery(updated.delivery)
         }
       } else {
@@ -113,8 +118,21 @@ export default function DeliveryTrackingPage() {
 
   // Use real coords from order if available, otherwise Manila mock
   const customerCoords = activeDelivery?.order?.lat && activeDelivery?.order?.lng 
-    ? [activeDelivery.order.lat, activeDelivery.order.lng] 
+    ? [parseFloat(activeDelivery.order.lat), parseFloat(activeDelivery.order.lng)] 
     : [14.5995 + (Math.random() - 0.5) * 0.02, 120.9842 + (Math.random() - 0.5) * 0.02] // Add some jitter for demo
+
+  // Debug logging
+  useEffect(() => {
+    if (activeDelivery) {
+      console.log("Active Delivery Data:", {
+        delivery: activeDelivery,
+        order: activeDelivery.order,
+        lat: activeDelivery.order?.lat,
+        lng: activeDelivery.order?.lng,
+        customerCoords,
+      });
+    }
+  }, [activeDelivery, customerCoords])
 
   return (
     <div className="container mx-auto p-4 md:p-6 max-w-5xl space-y-6">

@@ -110,6 +110,30 @@ export const columns = [
     },
   },
   {
+    accessorKey: "delivery",
+    header: "Assigned Rider",
+    cell: ({ row }) => {
+      const delivery = row.original.delivery
+      if (!delivery) {
+        return (
+          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+            <Bike className="h-3.5 w-3.5" />
+            <span>Not assigned</span>
+          </div>
+        )
+      }
+      return (
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1.5 font-medium">
+            <Bike className="h-3.5 w-3.5 text-blue-600" />
+            {delivery.deliveryPerson.firstName} {delivery.deliveryPerson.lastName}
+          </div>
+          <span className="text-xs text-muted-foreground ml-5">{delivery.deliveryPerson.phone || "N/A"}</span>
+        </div>
+      )
+    },
+  },
+  {
     id: "actions",
     cell: ({ row }) => {
       const order = row.original

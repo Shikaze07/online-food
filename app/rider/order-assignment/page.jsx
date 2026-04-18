@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { getRiderDeliveries, updateDeliveryStatus, getDeliveryPersonnel } from "@/lib/actions/delivery-actions"
+import { getRiderDeliveries, updateDeliveryStatus } from "@/lib/actions/delivery-actions"
+import { getCurrentUser } from "@/lib/actions/auth-actions"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -25,13 +26,14 @@ export default function OrderAssignmentPage() {
   const [deliveries, setDeliveries] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedRiderId, setSelectedRiderId] = useState("")
+  const [updatingId, setUpdatingId] = useState(null)
 
-  // Automically select the first rider as "logged in" since auth is pending
+  // Initialize by fetching the logged-in rider's session
   useEffect(() => {
     async function init() {
-      const res = await getDeliveryPersonnel()
-      if (res.personnel && res.personnel.length > 0) {
-        setSelectedRiderId(res.personnel[0].id.toString())
+      const user = await getCurrentUser()
+      if (user && user.role === "RIDER") {
+        setSelectedRiderId(user.id.toString())
       }
       setLoading(false)
     }
@@ -49,13 +51,14 @@ export default function OrderAssignmentPage() {
   }, [selectedRiderId])
 
   const handleStatusUpdate = async (deliveryId, newStatus) => {
-    setLoading(true)
+    setUpdatingId(deliveryId)
     try {
       const res = await updateDeliveryStatus(deliveryId, { status: newStatus })
       if (res.success) {
-        toast.success(`Status updated to ${newStatus}`)
         if (newStatus === "PICKED_UP") {
+          toast.success("Pickup confirmed! Redirecting to tracking...")
           router.push("/rider/delivery-tracking")
+          return // Exit early for redirect
         } else {
           const updated = await getRiderDeliveries(selectedRiderId)
           if (updated.deliveries) setDeliveries(updated.deliveries)
@@ -66,7 +69,7 @@ export default function OrderAssignmentPage() {
     } catch (error) {
       toast.error("An unexpected error occurred")
     } finally {
-      setLoading(false)
+      setUpdatingId(null)
     }
   }
 
@@ -161,9 +164,9 @@ export default function OrderAssignmentPage() {
                   <Button 
                     className="w-full font-bold gap-2" 
                     onClick={() => handleStatusUpdate(delivery.id, "PICKED_UP")}
-                    disabled={loading}
+                    disabled={updatingId === delivery.id}
                   >
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}
+                    {updatingId === delivery.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Package className="h-4 w-4" />}
                     Confirm Pickup
                   </Button>
                 )}
@@ -172,9 +175,9 @@ export default function OrderAssignmentPage() {
                     variant="warning"
                     className="w-full font-bold gap-2 bg-amber-500 hover:bg-amber-600 text-white" 
                     onClick={() => handleStatusUpdate(delivery.id, "ON_THE_WAY")}
-                    disabled={loading}
+                    disabled={updatingId === delivery.id}
                   >
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
+                    {updatingId === delivery.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Truck className="h-4 w-4" />}
                     Start Delivery
                   </Button>
                 )}
@@ -182,9 +185,9 @@ export default function OrderAssignmentPage() {
                   <Button 
                     className="w-full font-bold gap-2 bg-green-600 hover:bg-green-700 text-white" 
                     onClick={() => handleStatusUpdate(delivery.id, "DELIVERED")}
-                    disabled={loading}
+                    disabled={updatingId === delivery.id}
                   >
-                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                    {updatingId === delivery.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                     Complete Delivery
                   </Button>
                 )}

@@ -112,7 +112,7 @@ export function DeliveryMap({ customerLocation, riderLocation, className }) {
           <CustomMarker position={riderLocation} label="Your Current Location" iconType="rider" />
         )}
 
-        <RecenterMap position={center} />
+        <RecenterMap position={riderLocation || customerLocation} />
       </MapContainer>
 
       {/* Map Legend/Overlay */}
