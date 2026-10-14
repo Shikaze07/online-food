@@ -61,7 +61,7 @@ export function DataTable({
           <div className="relative w-full sm:w-[350px]">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search burgers or sides..."
+              placeholder="Search pizzas or sides..."
               value={globalFilter ?? ""}
               onChange={(event) => setGlobalFilter(event.target.value)}
               className="pl-9 h-9"
@@ -81,9 +81,9 @@ export function DataTable({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Items</SelectItem>
-              <SelectItem value="Classic Burgers">Classic Burgers</SelectItem>
-              <SelectItem value="Specialty Burgers">Specialty Burgers</SelectItem>
-              <SelectItem value="Sides & Fries">Sides & Fries</SelectItem>
+              <SelectItem value="Classic Pizzas">Classic Pizzas</SelectItem>
+              <SelectItem value="Specialty Pizzas">Specialty Pizzas</SelectItem>
+              <SelectItem value="Sides & Appetizers">Sides & Appetizers</SelectItem>
               <SelectItem value="Drinks">Drinks</SelectItem>
               <SelectItem value="Combos">Combos</SelectItem>
             </SelectContent>

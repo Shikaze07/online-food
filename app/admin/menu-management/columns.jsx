@@ -136,7 +136,7 @@ export const columns = [
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => setEditOpen(true)}>
                 <Pencil className="mr-2 h-4 w-4" />
-                Edit Burger
+                Edit Pizza
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleToggle}>
                 {item.isAvailable ? (
@@ -174,7 +174,7 @@ export const columns = [
             onConfirm={handleDelete}
             isLoading={isLoading}
             title="Remove from Menu?"
-            description={`Are you sure you want to remove "${item.name}" from the burger menu?`}
+            description={`Are you sure you want to remove "${item.name}" from the pizza menu?`}
             confirmText="Remove"
             variant="destructive"
           />

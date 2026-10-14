@@ -85,7 +85,7 @@
   --font-mono: Fira Code, ui-monospace, SFMono-Regular;
 
   --radius: 0.6rem;
-  
+
   --shadow-2xs: 0px 1px 3px 0px oklch(0.70 0.17 28.12 / 0.03);
   --shadow-xs: 0px 1px 3px 0px oklch(0.70 0.17 28.12 / 0.03);
   --shadow-sm: 0px 1px 3px 0px oklch(0.70 0.17 28.12 / 0.05), 0px 1px 2px -1px oklch(0.70 0.17 28.12 / 0.05);
@@ -94,7 +94,7 @@
   --shadow-lg: 0px 1px 3px 0px oklch(0.70 0.17 28.12 / 0.05), 0px 4px 6px -1px oklch(0.70 0.17 28.12 / 0.05);
   --shadow-xl: 0px 1px 3px 0px oklch(0.70 0.17 28.12 / 0.05), 0px 8px 10px -1px oklch(0.70 0.17 28.12 / 0.05);
   --shadow-2xl: 0px 1px 3px 0px oklch(0.70 0.17 28.12 / 0.13);
-  
+
 }
 
 .dark {
@@ -129,7 +129,7 @@
   --sidebar-accent-foreground: oklch(0.26 0.02 63.41);
   --sidebar-border: oklch(0.45 0.05 60.24);
   --sidebar-ring: oklch(0.70 0.17 28.12);
-  
+
   --shadow-2xs: 0px 1px 3px 0px oklch(0.70 0.17 28.12 / 0.03);
   --shadow-xs: 0px 1px 3px 0px oklch(0.70 0.17 28.12 / 0.03);
   --shadow-sm: 0px 1px 3px 0px oklch(0.70 0.17 28.12 / 0.05), 0px 1px 2px -1px oklch(0.70 0.17 28.12 / 0.05);
@@ -190,4 +190,25 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
+}
+
+@layer base {
+  .maplibregl-popup-content {
+    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+  }
+  .maplibregl-popup-tip {
+    @apply hidden!;
+  }
+  .maplibregl-ctrl-attrib {
+    @apply bg-background! text-muted-foreground! border-border! rounded-md! border! shadow-sm!;
+  }
+  .maplibregl-ctrl-attrib a {
+    @apply text-muted-foreground!;
+  }
+  .maplibregl-ctrl-attrib a:hover {
+    @apply text-foreground!;
+  }
+  .maplibregl-ctrl-attrib-button {
+    @apply bg-transparent! dark:invert;
+  }
 }

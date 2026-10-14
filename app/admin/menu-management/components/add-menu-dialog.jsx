@@ -48,8 +48,8 @@ export function AddMenuDialog() {
     defaultValues: {
       name: "",
       description: "",
-      price: 0,
-      category: "Classic Burgers",
+      price: "",
+      category: "Classic Pizzas",
       imageUrl: "",
       isAvailable: true,
     },
@@ -119,17 +119,17 @@ export function AddMenuDialog() {
       <DialogTrigger asChild>
         <Button className="gap-2">
           <PlusCircle className="h-4 w-4" />
-          Add Menu Item
+          Add Pizza / Item
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <div className="flex items-center gap-2 text-primary mb-1">
             <UtensilsCrossed className="h-5 w-5" />
-            <DialogTitle>Add New Menu Item</DialogTitle>
+            <DialogTitle>Add New Pizza / Item</DialogTitle>
           </div>
           <DialogDescription>
-            Enter the details for the new menu item including a photo.
+            Enter the details for the new pizza or menu item including a photo.
           </DialogDescription>
         </DialogHeader>
 
@@ -184,7 +184,7 @@ export function AddMenuDialog() {
 
           <div className="space-y-2">
             <Label htmlFor="name">Item Name</Label>
-            <Input id="name" {...register("name")} placeholder="e.g. Classic Cheeseburger" />
+            <Input id="name" {...register("name")} placeholder="e.g. Pepperoni Pizza" />
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
           </div>
 
@@ -207,14 +207,14 @@ export function AddMenuDialog() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select defaultValue="Classic Burgers" onValueChange={(val) => setValue("category", val)}>
+              <Select defaultValue="Classic Pizzas" onValueChange={(val) => setValue("category", val)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Classic Burgers">Classic Burgers</SelectItem>
-                  <SelectItem value="Specialty Burgers">Specialty Burgers</SelectItem>
-                  <SelectItem value="Sides & Fries">Sides &amp; Fries</SelectItem>
+                  <SelectItem value="Classic Pizzas">Classic Pizzas</SelectItem>
+                  <SelectItem value="Specialty Pizzas">Specialty Pizzas</SelectItem>
+                  <SelectItem value="Sides & Appetizers">Sides &amp; Appetizers</SelectItem>
                   <SelectItem value="Drinks">Drinks</SelectItem>
                   <SelectItem value="Combos">Combos</SelectItem>
                 </SelectContent>

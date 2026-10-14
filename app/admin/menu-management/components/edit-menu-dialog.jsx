@@ -130,10 +130,10 @@ export function EditMenuDialog({ item, open, onOpenChange }) {
         <DialogHeader>
           <div className="flex items-center gap-2 text-primary mb-1">
             <UtensilsCrossed className="h-5 w-5" />
-            <DialogTitle>Edit Menu Item</DialogTitle>
+            <DialogTitle>Edit Pizza / Menu Item</DialogTitle>
           </div>
           <DialogDescription>
-            Modify the details or photo of this menu item.
+            Modify the details or photo of this pizza or menu item.
           </DialogDescription>
         </DialogHeader>
 
@@ -225,9 +225,9 @@ export function EditMenuDialog({ item, open, onOpenChange }) {
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Classic Burgers">Classic Burgers</SelectItem>
-                  <SelectItem value="Specialty Burgers">Specialty Burgers</SelectItem>
-                  <SelectItem value="Sides & Fries">Sides &amp; Fries</SelectItem>
+                  <SelectItem value="Classic Pizzas">Classic Pizzas</SelectItem>
+                  <SelectItem value="Specialty Pizzas">Specialty Pizzas</SelectItem>
+                  <SelectItem value="Sides & Appetizers">Sides &amp; Appetizers</SelectItem>
                   <SelectItem value="Drinks">Drinks</SelectItem>
                   <SelectItem value="Combos">Combos</SelectItem>
                 </SelectContent>

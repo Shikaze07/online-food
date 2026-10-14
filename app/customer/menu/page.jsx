@@ -11,9 +11,9 @@ import { Input } from "@/components/ui/input"
 
 const categories = [
   "All Items",
-  "Classic Burgers",
-  "Specialty Burgers",
-  "Sides & Fries",
+  "Classic Pizzas",
+  "Specialty Pizzas",
+  "Sides & Appetizers",
   "Drinks",
   "Combos",
 ]
