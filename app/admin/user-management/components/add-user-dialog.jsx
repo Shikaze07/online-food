@@ -48,7 +48,7 @@ export function AddUserDialog() {
   } = useForm({
     resolver: zodResolver(userSchema),
     defaultValues: {
-      role: "CUSTOMER",
+      role: "ADMIN",
       firstName: "",
       middleName: "",
       lastName: "",
@@ -130,13 +130,12 @@ export function AddUserDialog() {
 
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
-            <Select defaultValue="CUSTOMER" onValueChange={(val) => setValue("role", val)}>
+            <Select defaultValue="ADMIN" onValueChange={(val) => setValue("role", val)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select Role" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ADMIN">Admin</SelectItem>
-                <SelectItem value="CUSTOMER">Customer</SelectItem>
                 <SelectItem value="RIDER">Rider</SelectItem>
               </SelectContent>
             </Select>
