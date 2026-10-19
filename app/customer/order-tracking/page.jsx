@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { OrderStatusBadge } from "@/app/admin/order-management/components/order-status-badge"
 import Link from "next/link"
 import dynamic from "next/dynamic"
+import { RouteLayer } from "@/components/route-layer"
 import {
   Pizza,
   ChefHat,
@@ -163,10 +164,10 @@ function TrackerContent() {
   useEffect(() => {
     mounted.current = true
     loadData()
-    // Auto-poll every 30s, only while the tab is visible
+    // Auto-poll every 10s for live rider position, only while the tab is visible
     const timer = setInterval(() => {
       if (document.visibilityState === "visible") loadData(true)
-    }, 30000)
+    }, 10000)
     return () => {
       mounted.current = false
       clearInterval(timer)
@@ -453,6 +454,10 @@ function TrackerContent() {
                   className="h-full w-full"
                 >
                   <MapControls position="top-right" showZoom showCompass showFullscreen showLocate />
+
+                  {riderCoords && (
+                    <RouteLayer from={riderCoords} to={customerCoords} />
+                  )}
 
                   {/* Customer Marker */}
                   <MapMarker

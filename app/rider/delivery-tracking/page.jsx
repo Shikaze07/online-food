@@ -1,8 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import dynamic from "next/dynamic"
 import { getRiderActiveDelivery, updateDeliveryStatus } from "@/lib/actions/delivery-actions"
+import { updateRiderLocation } from "@/lib/actions/route-actions"
+import { RouteLayer } from "@/components/route-layer"
 import { getCurrentUser } from "@/lib/actions/auth-actions"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -107,6 +109,21 @@ export default function DeliveryTrackingPage() {
       return () => navigator.geolocation.clearWatch(watchId)
     }
   }, [])
+
+  // Broadcast rider GPS to the customer every 10s while delivering
+  const coordsRef = useRef(null)
+  coordsRef.current = riderCoords
+  const hasCoords = riderCoords != null
+  useEffect(() => {
+    if (!activeDelivery?.id || !hasCoords) return
+    const push = () => {
+      const c = coordsRef.current
+      if (c) updateRiderLocation(activeDelivery.id, c[0], c[1])
+    }
+    push()
+    const t = setInterval(push, 10000)
+    return () => clearInterval(t)
+  }, [activeDelivery?.id, hasCoords])
 
   // Fetch active delivery for the logged in rider
   useEffect(() => {
@@ -222,6 +239,13 @@ export default function DeliveryTrackingPage() {
                   className="h-full w-full"
                 >
                   <MapControls position="top-right" showZoom showCompass showFullscreen showLocate />
+
+                  {riderCoords && (
+                    <RouteLayer
+                      from={{ lat: riderCoords[0], lng: riderCoords[1] }}
+                      to={{ lat: customerCoords[0], lng: customerCoords[1] }}
+                    />
+                  )}
 
                   {/* Customer Destination Marker */}
                   <MapMarker
