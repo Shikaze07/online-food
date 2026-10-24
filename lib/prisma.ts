@@ -1,22 +1,25 @@
 import "dotenv/config";
-// Force recompile: 2026-03-19T22:58:00Z
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  pool: Pool | undefined;
 };
 
 const createPrismaClient = () => {
-  const adapter = new PrismaMariaDb({
-    host: process.env.DATABASE_HOST,
-    user: process.env.DATABASE_USER,
-    port: parseInt(process.env.DATABASE_PORT ?? "3306", 10),
-    password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE_NAME,
-    connectionLimit: 10,
-     connectTimeout: 30000,
-  });
+  const pool =
+    globalForPrisma.pool ??
+    new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+
+  if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.pool = pool;
+  }
+
+  const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 };
 
